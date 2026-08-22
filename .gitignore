@@ -1,0 +1,25 @@
+# ---- generated outputs (reproducible from open_data/ via run_all.R) ----------
+outputs/
+plots/
+paper_materials/
+
+# ---- large auto-downloaded data (fetched by 06 on first run) -----------------
+open_data/SDOT_Collisions.csv
+
+# ---- R session / project cruft ----------------------------------------------
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+renv/library/
+
+# ---- OS / editor ------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+
+# ---- keep the shared dataset tracked ----------------------------------------
+!open_data/school_start_times_14states.csv
+!open_data/nces_national_minimal.csv
+!open_data/school_start_times_14states_DICTIONARY.md
