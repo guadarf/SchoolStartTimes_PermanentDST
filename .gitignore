@@ -23,3 +23,6 @@ desktop.ini
 !open_data/school_start_times_14states.csv
 !open_data/nces_national_minimal.csv
 !open_data/school_start_times_14states_DICTIONARY.md
+
+# local cleanup scratch (safe to delete)
+_to_delete/
