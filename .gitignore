@@ -5,6 +5,7 @@ paper_materials/
 
 # ---- large auto-downloaded data (fetched by 06 on first run) -----------------
 open_data/SDOT_Collisions.csv
+open_data/FARS*National/
 
 # ---- R session / project cruft ----------------------------------------------
 .Rhistory
@@ -23,6 +24,8 @@ desktop.ini
 !open_data/school_start_times_14states.csv
 !open_data/nces_national_minimal.csv
 !open_data/school_start_times_14states_DICTIONARY.md
+!open_data/fars_ped_national_minimal.csv
+!open_data/fars_ped_national_minimal_DICTIONARY.md
 
 # local cleanup scratch (safe to delete)
 _to_delete/

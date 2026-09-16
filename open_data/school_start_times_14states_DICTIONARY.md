@@ -52,7 +52,7 @@ programs, and schools with highly irregular schedules.
 - Enrollment and coordinates are 2024–25; start times reflect 2025–26 or 2026–27
   schedules depending on availability.
 - Row counts by status (assessed = 18,549; included = 16,093) are reproduced by
-  `08_inclusion_summary.R`.
+  `05_inclusion_summary.R`.
 
 ## Source / license
 

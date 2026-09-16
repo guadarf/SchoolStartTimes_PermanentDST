@@ -179,10 +179,21 @@ read_state <- function(state) {
 # Uses each school's own standard offset. Polar handling: when the sun never
 # reaches the threshold, split into polar NIGHT (always dark -> +Inf) and polar
 # DAY (never dark -> -Inf) by the solar-noon altitude.
+#
+# NOTE on the "date + 1" below: suncalc::getSunlightTimes(), at least in the
+# version installed when this bug was found (2026-09), labels the sunrise it
+# returns with the CALENDAR DAY BEFORE the date actually requested, for
+# locations west of Greenwich (checked empirically for Washington, offset -8,
+# and Maine, offset -5 -- both showed the same one-day-early label). Since we
+# then measure utc_h relative to midnight UTC of the date WE asked for, the
+# untouched code was computing sunrise almost 24h off, which silently zeroed
+# out every dark-day count. Asking for `date + 1` instead makes the returned
+# timestamp fall on the date we actually want, while the difftime reference
+# below is intentionally left at the original `grid$date` (not `date + 1`).
 sunrise_grid <- function(df, dates) {
   grid <- tidyr::crossing(row = seq_len(nrow(df)), date = dates) %>%
     mutate(lat = df$lat[row], lon = df$lon[row], std_offset = df$std_offset[row])
-  s <- getSunlightTimes(data = data.frame(date = grid$date, lat = grid$lat, lon = grid$lon),
+  s <- getSunlightTimes(data = data.frame(date = grid$date + 1, lat = grid$lat, lon = grid$lon),
                         keep = SUN_KEEP, tz = "UTC")
   utc_h <- as.numeric(difftime(s[[SUN_KEEP]],
                                as.POSIXct(paste0(grid$date, " 00:00:00"), tz = "UTC"),
@@ -203,4 +214,48 @@ sunrise_grid <- function(df, dates) {
     sunrise_permDST = clock(1),
     sunrise_current = clock(ifelse(is_dst(date), 1, 0))
   )
+}
+
+# ---- FARS national traffic-safety analytic window (shared) ------------------
+# Defines "real school-year weekday, 07:00-08:30 local time" for the national
+# FARS pedestrian-safety analysis. Kept here (not baked into the minimal CSV)
+# so the exact same filter is used both by 06_export_fars_minimal.R's built-in
+# sanity check and by 07_fars_paper_analysis.R when reproducing the paper's
+# numbers -- one place to audit the sample definition, applied identically
+# everywhere. Approximates the national school calendar the same way as the
+# rest of the study (Labor Day, Thanksgiving, winter break, MLK Day,
+# Presidents' Day, and the last Monday of May as a Memorial Day proxy).
+FARS_W_START <- 7.0
+FARS_W_END   <- 8.5
+
+fars_school_window <- function(df) {
+  # df needs: date (Date), hour, minute (0-23 / 0-59), day_week (1=Sun..7=Sat, FARS convention)
+  nth_weekday <- function(year, month, wd, n) {
+    first <- as.Date(sprintf("%04d-%02d-01", year, month))
+    days <- first + 0:6
+    first_wd <- days[wday(days) == wd][1]
+    first_wd + 7 * (n - 1)
+  }
+  last_weekday <- function(year, month, wd) {
+    nxt <- if (month == 12) as.Date(sprintf("%04d-01-01", year + 1)) else as.Date(sprintf("%04d-%02d-01", year, month + 1))
+    last_day <- nxt - 1
+    days <- last_day - 6:0
+    days[wday(days) == wd][1]
+  }
+  yrs <- unique(lubridate::year(df$date))
+  anchors <- (min(yrs) - 1):max(yrs)
+  non_school <- unique(do.call(c, lapply(anchors, function(y) {
+    c(nth_weekday(y, 9, 2, 1),
+      nth_weekday(y, 11, 5, 4), nth_weekday(y, 11, 5, 4) + 1,
+      seq(as.Date(sprintf("%d-12-23", y)), as.Date(sprintf("%d-12-31", y)), by = "day"),
+      as.Date(sprintf("%d-01-01", y + 1)),
+      nth_weekday(y + 1, 1, 2, 3),
+      nth_weekday(y + 1, 2, 2, 3),
+      last_weekday(y + 1, 5, 2))
+  })))
+  hourdec <- df$hour + df$minute / 60
+  df[df$day_week %in% 2:6 &
+     lubridate::month(df$date) %in% c(9:12, 1:6) &
+     !(df$date %in% non_school) &
+     hourdec >= FARS_W_START & hourdec < FARS_W_END, , drop = FALSE]
 }
