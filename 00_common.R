@@ -180,20 +180,27 @@ read_state <- function(state) {
 # reaches the threshold, split into polar NIGHT (always dark -> +Inf) and polar
 # DAY (never dark -> -Inf) by the solar-noon altitude.
 #
-# NOTE on the "date + 1" below: suncalc::getSunlightTimes(), at least in the
-# version installed when this bug was found (2026-09), labels the sunrise it
-# returns with the CALENDAR DAY BEFORE the date actually requested, for
-# locations west of Greenwich (checked empirically for Washington, offset -8,
-# and Maine, offset -5 -- both showed the same one-day-early label). Since we
-# then measure utc_h relative to midnight UTC of the date WE asked for, the
-# untouched code was computing sunrise almost 24h off, which silently zeroed
-# out every dark-day count. Asking for `date + 1` instead makes the returned
-# timestamp fall on the date we actually want, while the difftime reference
-# below is intentionally left at the original `grid$date` (not `date + 1`).
+# NOTE on "date + 1" (2026-09, now REMOVED -- see 2026-10 update below):
+# suncalc::getSunlightTimes(), in the package version installed when this was
+# first found (2026-09), labeled the sunrise it returned with the CALENDAR DAY
+# BEFORE the date actually requested, for locations west of Greenwich (checked
+# empirically for Washington, offset -8, and Maine, offset -5). Since utc_h is
+# measured relative to midnight UTC of the date WE asked for, the untouched
+# code was computing sunrise almost 24h off, silently zeroing out every
+# dark-day count. Asking for `date + 1` compensated for that.
+#
+# UPDATE (2026-10-03): with the currently installed suncalc, requesting
+# `date + 1` produces sunrise timestamps systematically ~24h (one full day)
+# LATE instead -- e.g. a real ~07:50 winter sunrise was coming out as "31:50"
+# -- which again makes every school's commute look like it's before sunrise,
+# 100% of days, under all three regimes. That matches this package no longer
+# having the one-day-early labeling bug described above (so the manual +1
+# over-corrects). Removed the `+ 1` below; if a future suncalc reintroduces
+# the original off-by-one-day bug, re-add it and note the package version.
 sunrise_grid <- function(df, dates) {
   grid <- tidyr::crossing(row = seq_len(nrow(df)), date = dates) %>%
     mutate(lat = df$lat[row], lon = df$lon[row], std_offset = df$std_offset[row])
-  s <- getSunlightTimes(data = data.frame(date = grid$date + 1, lat = grid$lat, lon = grid$lon),
+  s <- getSunlightTimes(data = data.frame(date = grid$date, lat = grid$lat, lon = grid$lon),
                         keep = SUN_KEEP, tz = "UTC")
   utc_h <- as.numeric(difftime(s[[SUN_KEEP]],
                                as.POSIXct(paste0(grid$date, " 00:00:00"), tz = "UTC"),

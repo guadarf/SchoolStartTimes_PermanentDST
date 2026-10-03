@@ -29,3 +29,9 @@ desktop.ini
 
 # local cleanup scratch (safe to delete)
 _to_delete/
+
+# ---- scratch/output drafts not meant for the public repo --------------------
+Claude outputs/
+
+# ---- manuscript drafts (kept on OneDrive/Overleaf, not in the public code repo) ----
+Paper/

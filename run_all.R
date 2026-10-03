@@ -14,8 +14,21 @@
 #   06  (optional) re-derives open_data/fars_ped_national_minimal.csv from the
 #       raw FARS folders; only needed if you want to regenerate that file
 #       yourself rather than use the one already in the repository.
+#   08  (Round-1 revision candidate, NOT yet confirmed -- see Paper/R1/
+#       revision_plan.md) national map of all 14 states' schools, requested by
+#       Reviewer #2 to de-emphasize Washington. Depends on 01's per-school
+#       outputs/ CSVs (run 01 first). Not called below by default yet; run it
+#       manually with `source("08_national_map_figure.R")` until the PI signs
+#       off on using it as the new main-text figure / moving the per-state
+#       maps to Supplementary.
 #
-# NOT part of the current paper (kept in archive/, not deleted -- see
+# NOTE (2026-10, R1 revision): the "no Supplemental Information" note below
+# was written for the original submission. The R1 decision letter DOES ask us
+# to follow the Supplemental Information Guide, and the plan above is to move
+# a few per-state maps there -- so archive/02_maps.R may become relevant again
+# once that is finalized. Re-check before deleting anything in archive/.
+#
+# Previously NOT part of the paper (kept in archive/, not deleted -- see
 # archive/README.md for why each one is there, and note they kept their
 # ORIGINAL numbers rather than being renumbered along with the active
 # pipeline above):
@@ -23,9 +36,9 @@
 #     analysis; replaced entirely by the FARS analysis above.
 #   - archive/02_maps.R, archive/03_flow_diagram.R -- per-state maps and
 #     inclusion-flow diagrams built for the PNAS submission's Supplementary
-#     Information. The Current Biology Report format has no separate
-#     Supplemental Information section, so these are not referenced by the
-#     current paper, and nothing in the pipeline below reads their output.
+#     Information. Originally dropped because the Current Biology Report
+#     format has no separate Supplemental Information section -- see the R1
+#     note above, this may change.
 #
 # Kept figures/outputs are produced for both metrics: SST (start vs sunrise) and
 # departure_20min (start - 20 min vs sunrise). Sunrise threshold only.

@@ -65,12 +65,14 @@ MLAB <- .sm %>% mutate(x = (sy - 1) * (7 + gapx) + 4, y = 1)
 # ---- calendar panel (3 regimes) for a df + commute --------------------------
 panel_calendar <- function(df, commute) {
   meanSST <- weighted.mean(df$SST_min, df$enroll, na.rm = TRUE)
-  # "+ 1" on the requested date: see the note in 00_common.R::sunrise_grid --
-  # getSunlightTimes() labels the sunrise it returns with the day BEFORE the
-  # one requested, at these (western) longitudes.
+  # UPDATE (2026-10-03): the "+ 1" workaround described in 00_common.R::
+  # sunrise_grid() is no longer needed with the currently installed suncalc
+  # (it was overcorrecting by a full day -- see that function's comment for
+  # the full history). Removed here too; this was a separate copy of the
+  # same fix, not shared code, so it had to be fixed in each location.
   wmeanST <- vapply(CAL_DAYS, function(dd) {
     d <- as.Date(dd, origin = "1970-01-01")
-    s <- getSunlightTimes(data = data.frame(date = d + 1, lat = df$lat, lon = df$lon),
+    s <- getSunlightTimes(data = data.frame(date = d, lat = df$lat, lon = df$lon),
                           keep = SUN_KEEP, tz = "UTC")
     h <- as.numeric(difftime(s[[SUN_KEEP]], as.POSIXct(paste0(d, " 00:00:00"), tz = "UTC"), units = "hours"))
     weighted.mean((h + df$std_offset) * 60, df$enroll, na.rm = TRUE)
@@ -215,7 +217,7 @@ build_figure <- function(commute, tag) {
 
   # compact heights so the map row doesn't leave large empty space
   fig <- plot_grid(pA, pB, pC, ncol = 1, rel_heights = c(0.78, 0.9, 1.0),
-                   labels = c("a", "b", "c"), label_size = 16, label_fontface = "bold")
+                   labels = c("A", "B", "C"), label_size = 16, label_fontface = "bold")
   ggsave(Pv(commute, "Figure1_WA.png"), fig, width = 13, height = 11, dpi = 300,
          bg = "white", limitsize = FALSE)
   cat("Figure written:", tag, "\n")

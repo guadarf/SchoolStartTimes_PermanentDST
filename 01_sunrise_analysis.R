@@ -49,10 +49,12 @@ analyze_state <- function(state) {
                         lapply(COMMUTE_GRID, departure_metrics))
 
   # ---- winter-solstice sunrise per school ----
-  # "+ 1" on the requested date: see the note in 00_common.R::sunrise_grid --
-  # getSunlightTimes() labels the sunrise it returns with the day BEFORE the
-  # one requested, at these (western) longitudes.
-  sol <- getSunlightTimes(data = data.frame(date = SOLSTICE + 1, lat = df$lat, lon = df$lon),
+  # UPDATE (2026-10-03): the "+ 1" workaround described in 00_common.R::
+  # sunrise_grid() is no longer needed with the currently installed suncalc
+  # (it was overcorrecting by a full day -- see that function's comment for
+  # the full history). Removed here too; this was a separate copy of the
+  # same fix, not shared code, so it had to be fixed in each location.
+  sol <- getSunlightTimes(data = data.frame(date = SOLSTICE, lat = df$lat, lon = df$lon),
                           keep = SUN_KEEP, tz = "UTC")
   sol_h <- as.numeric(difftime(sol[[SUN_KEEP]], as.POSIXct(paste0(SOLSTICE, " 00:00:00"), tz = "UTC"),
                                units = "hours"))

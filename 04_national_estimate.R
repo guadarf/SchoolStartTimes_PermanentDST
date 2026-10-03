@@ -53,10 +53,12 @@ acc  <- matrix(0, nrow = length(REF_MIN), ncol = 3,
 
 for (dnum in as.numeric(SCHOOL_DAYS)) {
   d <- as.Date(dnum, origin = "1970-01-01")
-  # "+ 1" on the requested date: see the note in 00_common.R::sunrise_grid --
-  # getSunlightTimes() labels the sunrise it returns with the day BEFORE the
-  # one requested, at these (western) longitudes.
-  s <- getSunlightTimes(data = data.frame(date = d + 1, lat = LAT, lon = LON),
+  # UPDATE (2026-10-03): the "+ 1" workaround described in 00_common.R::
+  # sunrise_grid() is no longer needed with the currently installed suncalc
+  # (it was overcorrecting by a full day -- see that function's comment for
+  # the full history). Removed here too; this was a separate copy of the
+  # same fix, not shared code, so it had to be fixed in each location.
+  s <- getSunlightTimes(data = data.frame(date = d, lat = LAT, lon = LON),
                         keep = SUN_KEEP, tz = "UTC")
   utc_h <- as.numeric(difftime(s[[SUN_KEEP]],
              as.POSIXct(paste0(d, " 00:00:00"), tz = "UTC"), units = "hours"))
